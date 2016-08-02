@@ -4,15 +4,32 @@
 <div class="col-md-4 col-md-offset-4">
     <h1>Todo List:</h1>
     <table class="table table-striped">
-        <th>#</th><th>User</th><th>Description</th><th></th>
+        <th>#</th><th>User</th><th>Description</th><th>Done</th><th>Delete</th>
         {% for todo in todos %}
+            {% if todo.done == "TRUE" %}
+            <tr class="success">
+            {% else %}
             <tr>
+            {% endif %}
                 <td>{{ todo.id }}</td>
                 <td>{{ todo.user_id }}</td>
                 <td>
+                    {% if todo.done == "TRUE" %}
+                    <s>{{ todo.description }}</s>
+                    {% else %}
                     <a href="{{ url_for('todo', id=todo.id) }}">
                        {{ todo.description }}
                     </a>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if todo.done == "TRUE" %}
+                    <button class="btn btn-xs btn-success"><span class="glyphicon glyphicon-check glyphicon-green"></span></button>
+                    {% else %}
+                    <form method="post" action="{{ url_for('todo_done', id=todo.id) }}">
+                        <button type="submit" class="btn btn-xs btn-warning"><span class="glyphicon glyphicon-check glyphicon-white"></span></button>
+                    </form>
+                    {% endif %}
                 </td>
                 <td>
                     <form method="post" action="{{ url_for('todo_delete', id=todo.id) }}">

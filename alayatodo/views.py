@@ -1,3 +1,4 @@
+import json
 from alayatodo import app
 from flask import (
     g,
@@ -89,3 +90,12 @@ def todo_delete(id):
     g.db.execute("DELETE FROM todos WHERE id ='%s'" % id)
     g.db.commit()
     return redirect('/todo')
+
+
+@app.route('/todo/<id>/json', methods=['GET'])
+def todo_json(id):
+    cur = g.db.execute("SELECT * FROM todos WHERE id ='%s'" % id)
+    todo = cur.fetchone()
+    data = [{'id': todo['id'], 'user_id': todo['user_id'], 'description': todo['description'], 'done': todo['done']}]
+    result = json.dumps(data)
+    return result

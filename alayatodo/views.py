@@ -9,10 +9,8 @@ from flask import (
     session
     )
 
-
+# pagination
 PER_PAGE = 5
-
-
 class Pagination(object):
     def __init__(self, page, per_page, total_count):
         self.page = page
@@ -39,6 +37,7 @@ class Pagination(object):
                     yield None
                 yield num
                 last = num
+
 
 
 @app.route('/')
@@ -76,17 +75,6 @@ def logout():
     return redirect('/')
 
 
-@app.route('/todo/<id>', methods=['GET'])
-def todo(id):
-    if not session.get('logged_in'):
-        return redirect('/login')
-    cur = g.db.execute("SELECT * FROM todos WHERE id ='%s' AND user_id = '%s'" % (id, session['user']['id']))
-    todo = cur.fetchone()
-    if not todo:
-        return redirect('/')
-    return render_template('todo.html', todo=todo)
-
-
 @app.route('/todo/', defaults={'page':1}, methods=['GET'])
 @app.route('/todo/page/<int:page>', methods=['GET'])
 def todos(page):
@@ -111,25 +99,26 @@ def todos_POST():
         % (session['user']['id'], request.form.get('description', ''))
     )
     g.db.commit()
-    return redirect('/todo')
+    return redirect('/todo/page/'+request.form.get('page', ''))
 
 
-@app.route('/todo/<id>', methods=['POST'])
-def todo_done(id):
+@app.route('/todo/<id>/<p>', methods=['POST'])
+def todo_done(id, p):
     if not session.get('logged_in'):
         return redirect('/login')
     g.db.execute("UPDATE todos SET done='TRUE' WHERE id ='%s'" % id)
     g.db.commit()
-    return redirect('/todo')
+    return redirect('/todo/page/'+p)
 
 
-@app.route('/todo/del/<id>', methods=['POST'])
-def todo_delete(id):
+@app.route('/todo/del/<id>/<p>', methods=['POST'])
+def todo_delete(id, p):
     if not session.get('logged_in'):
         return redirect('/login')
     g.db.execute("DELETE FROM todos WHERE id ='%s'" % id)
     g.db.commit()
-    return redirect('/todo')
+    #return render_template('todos.html', pagination=pagination, todos=todos)
+    return redirect('/todo/page/'+p)
 
 
 @app.route('/todo/<id>/json', methods=['GET'])
@@ -143,3 +132,12 @@ def todo_json(id):
     data = [{'id': todo['id'], 'user_id': todo['user_id'], 'description': todo['description'], 'done': todo['done']}]
     result = json.dumps(data)
     return result
+
+
+@app.route('/todo/<id>/<p>', methods=['GET'])
+def todo_view(id, p):
+    if not session.get('logged_in'):
+        return redirect('/login')
+    cur = g.db.execute("SELECT * FROM todos WHERE id ='%s' AND user_id = '%s'" % (id, session['user']['id']))
+    todo = cur.fetchone()
+    return render_template('todo.html', todo=todo, p=p)

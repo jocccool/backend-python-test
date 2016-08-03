@@ -67,7 +67,7 @@
                     {% if todo.done == "TRUE" %}
                     <s>{{ todo.description }}</s>
                     {% else %}
-                    <a href="{{ url_for('todo', id=todo.id) }}">
+                    <a href="{{ url_for('todo_view', id=todo.id, p=pagination.page) }}">
                        {{ todo.description }}
                     </a>
                     {% endif %}
@@ -76,30 +76,46 @@
                     {% if todo.done == "TRUE" %}
                     <button class="btn btn-xs btn-success"><span class="glyphicon glyphicon-check glyphicon-green"></span></button>
                     {% else %}
-                    <form method="post" action="{{ url_for('todo_done', id=todo.id) }}">
+                    <form method="post" action="{{ url_for('todo_done', id=todo.id, p=pagination.page) }}">
                         <button type="submit" class="btn btn-xs btn-warning"><span class="glyphicon glyphicon-check glyphicon-white"></span></button>
                     </form>
                     {% endif %}
                 </td>
                 <td>
-                    <form method="post" action="{{ url_for('todo_delete', id=todo.id) }}">
-                        <button type="submit" class="btn btn-xs btn-danger" id="remove" value="delete"><span class="glyphicon glyphicon-remove glyphicon-white"></span></button>
+                    <form id="remove{{ todo.id }}" method="post" action="{{ url_for('todo_delete', id=todo.id, p=pagination.page) }}">
+                        <button type="button" onClick='delconf( {{ todo.id }}, "{{ todo.description }}" )' class="btn btn-xs btn-danger"><span class="glyphicon glyphicon-remove glyphicon-white"></span></button>
                     </form>
                 </td>
             </tr>  
         {% endif %}
         {% endfor %}
         <tr>
-            <form method="post" action="{{ url_for('todos_POST') }}">
+            <form id="add" method="post" action="{{ url_for('todos_POST') }}">
                 <td colspan="3">
                     <!-- required field -->
                     <input type="textbox" name="description" class="small-6 small-center" placeholder="Description..." required>
+                    <!-- hidden -->
+                    <input type="hidden" name="page" value="{{ pagination.page }}">
                 </td>
                 <td>
-                    <button type="submit" class="btn btn-sm btn-primary">Add</button>
+                    <button type="submit" onClick='addconf()' class="btn btn-sm btn-primary">Add</button>
                 </td>
             </form>
         </tr>
     </table>
+    <script>
+    function delconf(id, tododes) {
+        var result = confirm("Delete task: \n"+tododes+" ?");
+        if (result == true) {
+            document.getElementById("remove"+id).submit();
+        }
+    };
+    function addconf() {
+        var result = confirm("Add this task?");
+        if (result == true) {
+            document.getElementById("add").submit();
+        }
+    };
+    </script>
 </div>
 {% endblock %}

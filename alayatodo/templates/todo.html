@@ -4,18 +4,46 @@
 <div class="col-md-4 col-md-offset-4">
     <h1>Todo:</h1>
     <table class="table table-striped">
-        <th>#</th><th>User</th><th>Description</th><th></th>
+        <th>#</th><th>User</th><th>Description</th><th>Done</th><th>Delete</th>
         <tr>
             <td>{{ todo.id }}</td>
             <td>{{ todo.user_id }}</td>
-            <td>{{ todo.description }}</td>
             <td>
-                <form method="post" action="{{ url_for('todo_delete', id=todo.id) }}">
-                    <button type="submit" class="btn btn-xs btn-danger"><span class="glyphicon glyphicon-remove glyphicon-white"></span></button>
+                {% if todo.done == "TRUE" %}
+                <s>{{ todo.description }}</s>
+                {% else %}
+                   {{ todo.description }}
+                {% endif %}
+            </td>
+            <td>
+                {% if todo.done == "TRUE" %}
+                    <button class="btn btn-xs btn-success"><span class="glyphicon glyphicon-check glyphicon-green"></span></button>
+                    {% else %}
+                    <form method="post" action="{{ url_for('todo_done', id=todo.id, p=p) }}">
+                        <button type="submit" class="btn btn-xs btn-warning"><span class="glyphicon glyphicon-check glyphicon-white"></span></button>
+                    </form>
+                    {% endif %}
+            </td>
+            <td>
+                <form id="remove{{ todo.id }}" method="post" action="{{ url_for('todo_delete', id=todo.id, p=p) }}">
+                    <button type="button" onClick="delconf({{ todo.id }}, '{{ todo.description }}')" class="btn btn-xs btn-danger"><span class="glyphicon glyphicon-remove glyphicon-white"></span></button>
                 </form>
             </td>
         </tr>
+        <tr>
+            <td>
+                <a href="../../todo/page/{{ p }}" class="btn btn-sm btn-primary">Back</a>
+            </td>
+        </tr>
     </table>
+    <script>
+    function delconf(id, tododes) {
+        var result = confirm("Delete task: \n"+tododes+" ?");
+        if (result == true) {
+            document.getElementById("remove"+id).submit();
+        }
+    };
+    </script>
 </div>
 
 {% endblock %}
